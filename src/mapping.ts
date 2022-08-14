@@ -10,6 +10,10 @@ import {
   SetTrustedRemote,
   Transfer
 } from "../generated/Axolittles/Axolittles"
+
+let stakeAddress = "0xdb4736ee9cf22d79501e4c079ac8ca090694274b"
+let nullAddress = "0x0000000000000000000000000000000000000000"
+
 import { Axolittle, Tran, TransferTransaction, AxoHolder } from "../generated/schema"
 
 export function handleApproval(event: Approval): void {}
@@ -45,6 +49,18 @@ export function handleTransfer(event: Transfer): void {
     axo.bridgeBlock = event.block.number
   }
   axo.owner = event.params.to.toHex()
+
+  if (event.params.to.toHex() == stakeAddress) {
+    //if this is a staking v1 transfer
+    axo.stakedOwner = event.params.from.toHex()
+  } else {
+    axo.stakedOwner = nullAddress
+  }
+
+  if (event.params.from.toHex() == stakeAddress) {
+    //if this is an unstaking v1 transfer
+    axo.stakedOwner = nullAddress
+  }
 
   fromAccount.lastActiveBlock = event.block.number
   toAccount.lastActiveBlock = event.block.number
